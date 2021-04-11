@@ -7,6 +7,10 @@ and a face specification ~FACE~.
 ~BEG~ and ~END~ are the regular expressions matching the beginning and the end
 of the region to be emphasized with ~FACE~.
 
+Supported are currently:
+1. Highlighting of the Org buffer itself
+2. HTML-Export
+
 This package is inspired by the following two https://emacs.stackexchange.com questions:
 1. [[https://emacs.stackexchange.com/questions/63306/emphasize-text-snippets-in-source-blocks][Emphasize text snippets in source blocks]]
 2. [[https://emacs.stackexchange.com/questions/63643/noweb-references-in-sh-blocks-breaks-the-syntax-highlighting?noredirect=1#comment102374_63643][Noweb references in sh blocks breaks the syntax highlighting]]
