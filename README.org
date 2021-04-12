@@ -39,7 +39,7 @@ This package is inspired by the following two https://emacs.stackexchange.com qu
 "Noweb source!"
 ,#+END_SRC
 
-,#+BEGIN_SRC sh :noweb yes :emph '(("<<" ">>" 'bold))
+,#+BEGIN_SRC sh :noweb yes :emph '(("<<" ">>"))
   #!bash
   if [[ "$1" == "Noweb reference" ]]; then
       echo <<F()>>
