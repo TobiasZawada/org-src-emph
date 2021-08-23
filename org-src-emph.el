@@ -63,17 +63,31 @@ Each marker is a list (RE-BEGIN RE-END FACE).
 Non-greedy matches for \\(?1:RE-BEGIN\\)\\(?2:.*\\)\\(?3:RE-END\\) are searched.
 The groups 1 and 3 are removed and group 1 is propertised by
 :org+emph (MATCH1 MATCH2 FACE)."
-  (dolist (emph emphasizers)
-    (goto-char (point-min))
-    (cl-multiple-value-bind
-	(re-begin re-end face) emph
-      (let ((re (format "\\(?1:%s\\)\\(?2:\\(?:.\\|\n\\)*?\\)\\(?3:%s\\)" re-begin re-end)))
-	(while (re-search-forward re nil t)
-	  (put-text-property (match-beginning 2) (match-end 2)
-			     :org+emph (list (match-string 1) (match-string 3) face))
-	  (replace-match "" nil nil nil 3)
-	  (replace-match "" nil nil nil 1))
-	))))
+  (save-match-data
+    (dolist (emph emphasizers)
+    ;;;;;;;;;;
+      ;; The following cases of specifications for emph are converted to (begin end face):
+      ;; - (beginAndEnd . face),
+      ;; - (beginAndEnd  face)
+      (cond
+       ((null (listp (cdr emph)))
+	(setq emph (list (car emph) (car emph) (cdr emph))))
+       ((eq (length emph) 2)
+	(setq emph (list (car emph) (car emph) (cadr emph)))))
+    ;;;;;;;;;;
+      (goto-char (point-min))
+      (cl-multiple-value-bind
+	  (re-begin re-end face) emph
+	(unless (stringp re-end)
+	  (setq face re-end
+		re-end re-begin))
+	(let ((re (format "\\(?1:%s\\)\\(?2:\\(?:.\\|\n\\)*?\\)\\(?3:%s\\)" re-begin re-end)))
+	  (while (re-search-forward re nil t)
+	    (put-text-property (match-beginning 2) (match-end 2)
+			       :org+emph (list (match-string 1) (match-string 3) face))
+	    (replace-match "" nil nil nil 3)
+	    (replace-match "" nil nil nil 1))
+	  )))))
 
 (cl-defun org-src-emph-restore (&key (face-prop 'face) emph-marks)
   "Restore emphasis from text properties in current buffer.
