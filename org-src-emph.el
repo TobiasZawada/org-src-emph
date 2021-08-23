@@ -71,8 +71,8 @@ The groups 1 and 3 are removed and group 1 is propertised by
     (cond
      ((null (listp (cdr emph)))
       (setq emph (list (car emph) (car emph) (cdr emph))))
-     ((eq (length emph) 2)
-      (setq emph (list (car emph) (car emph) (cadr emph)))))
+     ((null (stringp (nth 1 emph)))
+      (setq emph (list (car emph) (car emph) (nth 1 emph)))))
     ;;;;;;;;;;
     (goto-char (point-min))
     (cl-multiple-value-bind
