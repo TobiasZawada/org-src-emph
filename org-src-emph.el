@@ -63,31 +63,30 @@ Each marker is a list (RE-BEGIN RE-END FACE).
 Non-greedy matches for \\(?1:RE-BEGIN\\)\\(?2:.*\\)\\(?3:RE-END\\) are searched.
 The groups 1 and 3 are removed and group 1 is propertised by
 :org+emph (MATCH1 MATCH2 FACE)."
-  (save-match-data
-    (dolist (emph emphasizers)
+  (dolist (emph emphasizers)
     ;;;;;;;;;;
-      ;; The following cases of specifications for emph are converted to (begin end face):
-      ;; - (beginAndEnd . face),
-      ;; - (beginAndEnd  face)
-      (cond
-       ((null (listp (cdr emph)))
-	(setq emph (list (car emph) (car emph) (cdr emph))))
-       ((eq (length emph) 2)
-	(setq emph (list (car emph) (car emph) (cadr emph)))))
+    ;; The following cases of specifications for emph are converted to (begin end face):
+    ;; - (beginAndEnd . face),
+    ;; - (beginAndEnd  face)
+    (cond
+     ((null (listp (cdr emph)))
+      (setq emph (list (car emph) (car emph) (cdr emph))))
+     ((eq (length emph) 2)
+      (setq emph (list (car emph) (car emph) (cadr emph)))))
     ;;;;;;;;;;
-      (goto-char (point-min))
-      (cl-multiple-value-bind
-	  (re-begin re-end face) emph
-	(unless (stringp re-end)
-	  (setq face re-end
-		re-end re-begin))
-	(let ((re (format "\\(?1:%s\\)\\(?2:\\(?:.\\|\n\\)*?\\)\\(?3:%s\\)" re-begin re-end)))
-	  (while (re-search-forward re nil t)
-	    (put-text-property (match-beginning 2) (match-end 2)
-			       :org+emph (list (match-string 1) (match-string 3) face))
-	    (replace-match "" nil nil nil 3)
-	    (replace-match "" nil nil nil 1))
-	  )))))
+    (goto-char (point-min))
+    (cl-multiple-value-bind
+	(re-begin re-end face) emph
+      (unless (stringp re-end)
+	(setq face re-end
+	      re-end re-begin))
+      (let ((re (format "\\(?1:%s\\)\\(?2:\\(?:.\\|\n\\)*?\\)\\(?3:%s\\)" re-begin re-end)))
+	(while (re-search-forward re nil t)
+	  (put-text-property (match-beginning 2) (match-end 2)
+			     :org+emph (list (match-string 1) (match-string 3) face))
+	  (replace-match "" nil nil nil 3)
+	  (replace-match "" nil nil nil 1))
+	))))
 
 (cl-defun org-src-emph-restore (&key (face-prop 'face) emph-marks)
   "Restore emphasis from text properties in current buffer.
@@ -149,21 +148,22 @@ In the ORG-BUFFER the text is at START."
   "Consider the :emph source block header argument.
 This is an around advice for `org-src-font-lock-fontify-block' as FUN.
 The args LANG START END are the same as for `org-src-font-lock-fontify-block'."
-  (if-let* ((buf (current-buffer))
+  (save-match-data
+    (if-let* ((buf (current-buffer))
 	      (info (org-babel-get-src-block-info 'light))
 	      (body (buffer-substring (1+ start) end))
 	      (args (nth 2 info))
 	      (emph-arg (alist-get :emph args))
 	      ((null (string-equal emph-arg "%emph")))
 	      (emph-exprs (eval (read emph-arg))))
-      (with-temp-buffer
-	(insert body)
-	(org-src-emph-strip emph-exprs)
-	(funcall fun lang (point-min) (point-max))
-	(org-src-emph-restore :emph-marks t)
-	(org-src-emph-transfer-props buf start)
-	)
-    (funcall fun lang start end)))
+	(with-temp-buffer
+	  (insert body)
+	  (org-src-emph-strip emph-exprs)
+	  (funcall fun lang (point-min) (point-max))
+	  (org-src-emph-restore :emph-marks t)
+	  (org-src-emph-transfer-props buf start)
+	  )
+      (funcall fun lang start end))))
 
 (advice-add 'org-src-font-lock-fontify-block :around #'org-src-emph-fontify-block)
 
