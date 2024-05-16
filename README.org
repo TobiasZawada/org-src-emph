@@ -26,7 +26,7 @@ This package is inspired by the following two https://emacs.stackexchange.com qu
 *** C++ example
 
 #+BEGIN_SRC org
-,#+BEGIN_SRC C++ :emph '("°" "°" 'bold)
+,#+BEGIN_SRC C++ :emph '(("°" "°" 'bold))
   std::cout << "°These words are highlighted.°\n";
 ,#+END_SRC
 #+END_SRC
